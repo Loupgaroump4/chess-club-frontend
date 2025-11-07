@@ -17,7 +17,7 @@ export default function ResetPassword() {
     if (password !== confirm) return alert('Les mots de passe ne correspondent pas');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/reset', {
+      const res = await fetch('https://tpchess-backend.vercel.app/auth/reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword: password }),
@@ -67,3 +67,4 @@ export default function ResetPassword() {
     </>
   );
 }
+
