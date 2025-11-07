@@ -40,7 +40,7 @@ export default function Compte() {
     }
   }
   async function login() {
-    const res = await fetch('http://localhost:5000/api/proxy/auth/login', {
+    const res = await fetch('https://tpchess-backend.vercel.app/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
