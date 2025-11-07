@@ -10,7 +10,7 @@ export default function Joueurs() {
 
   const fetchClassement = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/classement");
+      const res = await fetch("https://tpchess-backend.vercel.app/classement");
       const data = await res.json();
       if (data.ok) setPlayers(data.players);
     } catch (err) {
@@ -66,3 +66,4 @@ export default function Joueurs() {
     </>
   );
 }
+
