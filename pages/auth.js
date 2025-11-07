@@ -22,7 +22,7 @@ export default function Compte() {
   }, [])
 
   async function register() {
-    const res = await fetch('http://localhost:5000/api/proxy/auth/register', {
+    const res = await fetch('https://tpchess-backend.vercel.app/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
