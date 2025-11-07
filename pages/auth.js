@@ -12,7 +12,7 @@ export default function Compte() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      fetch('http://localhost:5000/api/proxy/me', {
+      fetch('https://tpchess-backend.vercel.app/proxy/me', {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
