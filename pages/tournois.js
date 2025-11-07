@@ -9,7 +9,7 @@ export default function Tournois() {
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState({}); // { [tournamentId]: true/false }
 
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const API = 'https://tpchess-backend.vercel.app';
 
   // Charger l'utilisateur connecté depuis localStorage
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function Tournois() {
 
   // Charger les tournois depuis le backend
   useEffect(() => {
-    fetch(`${API}/api/tournaments`)
+    fetch(`${API}/tournaments`)
       .then(res => res.json())
       .then(data => {
         if (data.ok) setTournaments(data.tournaments);
@@ -36,7 +36,7 @@ export default function Tournois() {
 
     tournaments.forEach(async (t) => {
       try {
-        const res = await fetch(`${API}/api/tournaments/${t.id}/is-joined`, {
+        const res = await fetch(`${API}/tournaments/${t.id}/is-joined`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const j = await res.json();
@@ -53,7 +53,7 @@ export default function Tournois() {
     if (!token) return alert('Veuillez vous connecter pour vous inscrire.');
 
     try {
-      const res = await fetch(`${API}/api/tournaments/${id}/join`, {
+      const res = await fetch(`${API}/tournaments/${id}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export default function Tournois() {
     }
   }
   async function addParticipant(tournamentId, username) {
-    const res = await fetch(`/api/tournaments/${tournamentId}/add-participant`, {
+    const res = await fetch(`/tournaments/${tournamentId}/add-participant`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
