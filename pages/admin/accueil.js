@@ -71,7 +71,7 @@ function parseNewsText(text) {
     if (image) formData.append("image", image);
 
     try {
-      const res = await fetch("http://localhost:5000/api/news", {
+      const res = await fetch("https://tpchess-backend.vercel.app/news", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -192,4 +192,5 @@ function parseNewsText(text) {
       </main>
     </>
     );
+
 }
