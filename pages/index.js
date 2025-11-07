@@ -32,7 +32,7 @@ export default function Home() {
 
   const fetchUpcoming = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/tournaments", {
+      const res = await fetch("https://tpchess-backend.vercel.app/tournaments", {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
@@ -50,7 +50,7 @@ export default function Home() {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/news?page=${page}&limit=${pageSize}`);
+      const res = await fetch(`https://tpchess-backend.vercel.app/news?page=${page}&limit=${pageSize}`);
       const data = await res.json();
       if (!data.ok) return;
 
@@ -110,7 +110,7 @@ export default function Home() {
         {/* ✅ Image */}
         {n.image_url && (
           <img
-            src={`http://localhost:5000${n.image_url}`}
+            src={`https://tpchess-backend.vercel.app/${n.image_url}`}
             alt="actualité"
             style={{
               height: "150px",
