@@ -54,7 +54,7 @@ function parseNewsText(text) {
 
   const fetchNews = async () => {
     try {
-      const res = await fetch("https://tpchess-backend.vercel.app/news");
+      const res = await fetch("https://tpchess-backend.vercel.app/api/news");
       const data = await res.json();
       if (data.ok) setNewsList(data.news);
     } catch (err) {
@@ -71,7 +71,7 @@ function parseNewsText(text) {
     if (image) formData.append("image", image);
 
     try {
-      const res = await fetch("https://tpchess-backend.vercel.app/news", {
+      const res = await fetch("https://tpchess-backend.vercel.app/api/news", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -96,7 +96,7 @@ function parseNewsText(text) {
     if (!confirm("Supprimer cette actualité ?")) return;
 
     try {
-      const res = await fetch(`https://tpchess-backend.vercel.app/news/${newsId}`, {
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/anews/${newsId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -194,4 +194,5 @@ function parseNewsText(text) {
     );
 
 }
+
 
