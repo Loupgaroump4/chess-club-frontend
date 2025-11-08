@@ -12,7 +12,7 @@ export default function Compte() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      fetch('https://tpchess-backend.vercel.app/proxy/me', {
+      fetch('https://tpchess-backend.vercel.app/api/me', {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -22,7 +22,7 @@ export default function Compte() {
   }, [])
 
   async function register() {
-    const res = await fetch('https://tpchess-backend.vercel.app/auth/register', {
+    const res = await fetch('https://tpchess-backend.vercel.app/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
@@ -40,7 +40,7 @@ export default function Compte() {
     }
   }
   async function login() {
-    const res = await fetch('https://tpchess-backend.vercel.app/auth/login', {
+    const res = await fetch('https://tpchess-backend.vercel.app/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
