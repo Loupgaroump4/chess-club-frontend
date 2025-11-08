@@ -32,7 +32,7 @@ export default function Account() {
   // Récupération de l'historique Elo
   const fetchEloHistory = async (userId) => {
     try {
-      const res = await fetch(`https://tpchess-backend.vercel.app/users/${userId}/elo-history`, { 
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/users/${userId}/elo-history`, { 
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -97,4 +97,5 @@ export default function Account() {
     </>
   );
 }
+
 
