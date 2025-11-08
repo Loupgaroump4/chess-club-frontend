@@ -9,7 +9,7 @@ export default function Tournois() {
   const [loading, setLoading] = useState(true);
   const [registrations, setRegistrations] = useState({}); // { [tournamentId]: true/false }
 
-  const API = 'https://tpchess-backend.vercel.app';
+  const API = 'https://tpchess-backend.vercel.app/api';
 
   // Charger l'utilisateur connecté depuis localStorage
   useEffect(() => {
