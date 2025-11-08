@@ -11,7 +11,7 @@ export default function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('https://tpchess-backend.vercel.app/auth/forgot', {
+      const res = await fetch('https://tpchess-backend.vercel.app/api/auth/forgot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email }),
@@ -44,4 +44,5 @@ export default function ForgotPassword() {
     </>
   );
 }
+
 
