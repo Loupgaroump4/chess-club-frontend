@@ -32,7 +32,7 @@ export default function AdminPlanning() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/planning", {
+      const res = await fetch("https://tpchess.vercel.app/ping/api/planning", {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
@@ -65,8 +65,8 @@ export default function AdminPlanning() {
     try {
       const method = currentEvent ? "PUT" : "POST";
       const url = currentEvent
-        ? `http://localhost:5000/api/planning-update/${currentEvent.id}`
-        : "http://localhost:5000/api/planning-add";
+        ? `https://tpchess.vercel.app/api/planning-update/${currentEvent.id}`
+        : "https://tpchess.vercel.app/api/planning-add";
       const res = await fetch(url, {
         method,
         headers: {
@@ -92,7 +92,7 @@ export default function AdminPlanning() {
     if (!currentEvent) return;
     if (!confirm("Supprimer cet événement ?")) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/planning-delete/${currentEvent.id}`, {
+      const res = await fetch(`https://tpchess.vercel.app/api/planning-delete/${currentEvent.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -242,3 +242,4 @@ export default function AdminPlanning() {
     </>
   );
 }
+
