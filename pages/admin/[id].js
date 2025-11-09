@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import { useRouter } from "next/router";
 
-const API = "https;//tpchess-backend.vercel.app";
+const API = "https://tpchess-backend.vercel.app";
 
 export default function TournamentDetail() {
   const router = useRouter();
