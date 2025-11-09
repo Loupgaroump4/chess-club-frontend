@@ -32,7 +32,7 @@ export default function AdminPlanning() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch("https://tpchess-backend.vercel.app/ping/api/planning", {
+      const res = await fetch("https://tpchess-backend.vercel.app/api/planning", {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       const data = await res.json();
@@ -242,6 +242,7 @@ export default function AdminPlanning() {
     </>
   );
 }
+
 
 
 
