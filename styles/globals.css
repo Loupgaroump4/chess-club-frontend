@@ -1,14 +1,113 @@
-:root{
+:root {
   --blue: #1E3A8A;
   --bg: #F8F9FA;
 }
-html,body,#__next{ width:100%; margin:0; font-family: Inter, system-ui, Arial; background:var(--bg); color:#111; }
-a{ color:var(--blue); text-decoration:none;}
-.header{ background: linear-gradient(90deg, var(--blue), lightgray); padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
-.header .nav a{ margin-right:16px; font-weight:600; color:var(--blue); }
-.container{ max-width:1000px; margin:20px auto; padding:12px; background:white; border-radius:10px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);}
-.card{ padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(133, 138, 30, 0.03), rgba(255,215,0,0.03)); margin-bottom:12px; }
-.button{ padding:8px 12px; border-radius:8px; background:var(--blue); color:lightgray; border:none; cursor:pointer;}
-.form-row{ margin-bottom:8px;}
-.input{ padding:8px; border-radius:6px; border:1px solid #ddd; width:100%; }
-.small{ font-size:0.9rem; color:#555; }
+
+/* Global */
+html, body, #__next {
+  width: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, Arial;
+  background: var(--bg);
+  color: #111;
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(90deg, var(--blue), lightgray);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.header .nav a {
+  margin-right: 16px;
+  font-weight: 600;
+  color: var(--blue);
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 16px auto;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+}
+
+/* Cards */
+.card {
+  padding: 12px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(133,138,30,0.03), rgba(255,215,0,0.03));
+  margin-bottom: 12px;
+}
+
+/* Buttons & inputs */
+.button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: lightgray;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.form-row {
+  margin-bottom: 10px;
+}
+
+.input,
+select,
+textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  width: 100%;
+}
+
+.small {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* ✅ Mobile First Improvements */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+  .header {
+    text-align: center;
+    justify-content: center;
+  }
+  .header .nav a {
+    margin-right: 8px;
+    display: inline-block;
+  }
+  .container {
+    margin: 10px;
+    padding: 10px;
+  }
+}
+
+/* ✅ Super Small Phones */
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+  h2, h3 {
+    text-align: center;
+  }
+}
