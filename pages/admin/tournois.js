@@ -29,7 +29,13 @@ export default function AdminTournois() {
 
   // Charger les tournois
   const fetchTournaments = async () => {
-    if (!token) return;
+    console.log('Token:', token);
+    if (!token) {
+      setLoading(false);
+      setMessage('⚠️ Vous devez être connecté pour accéder à cette page.');
+      return;
+    }
+
     try {
       const res = await fetch('https://tpchess.vercel.app/api/tournaments', {
         headers: { Authorization: `Bearer ${token}` },
@@ -338,4 +344,5 @@ export default function AdminTournois() {
     </>
   );
 }
+
 
