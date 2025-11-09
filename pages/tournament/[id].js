@@ -94,8 +94,6 @@ export default function TournamentDetail() {
       } catch (err) {
         console.error("Load error →", err);
         alert("Erreur chargement : " + err.message);
-}
-
       } finally {
         setLoading(false);
       }
