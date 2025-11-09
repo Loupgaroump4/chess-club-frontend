@@ -69,7 +69,6 @@ export default function AdminTournament() {
       const u = JSON.parse(stored);
       setUser(u);
       if (!u.admin) setMessage('❌ Accès refusé : cette page est réservée aux administrateurs.');
-      else fetchTournaments();
     } else {
       setMessage('⚠️ Vous devez être connecté pour accéder à cette page.');
       setLoading(false);
