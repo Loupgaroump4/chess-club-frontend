@@ -5,6 +5,7 @@
 
 /* Global */
 html, body, #__next {
+  overflow-x: hidden;
   width: 100%;
   margin: 0;
   font-family: Inter, system-ui, Arial;
@@ -35,15 +36,14 @@ a {
   color: var(--blue);
 }
 
-/* Container */
 .container {
   width: 100%;
-  max-width: 1100px;
-  margin: 16px auto;
+  max-width: 100%;
+  margin: 0;
   padding: 12px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Cards */
@@ -83,26 +83,34 @@ textarea {
   color: #555;
 }
 
-/* ✅ Mobile First Improvements */
 @media (max-width: 768px) {
-  html {
-    font-size: 15px;
-  }
   .header {
-    text-align: center;
-    justify-content: center;
-  }
-  .header .nav a {
-    margin-right: 8px;
-    display: inline-block;
-  }
-  .container {
-    margin: 10px;
+    flex-direction: column;
+    align-items: center;
     padding: 10px;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .header .nav {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .header .nav a {
+    margin: 0;
+    padding: 4px 0;
+  }
+
+  .button.account-btn {
+    width: auto;
+    padding: 8px 16px;
   }
 }
 
-/* ✅ Super Small Phones */
 @media (max-width: 480px) {
   html {
     font-size: 14px;
