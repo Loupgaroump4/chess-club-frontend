@@ -37,7 +37,7 @@ export default function AdminTournois() {
     }
 
     try {
-      const res = await fetch('https://tpchess.vercel.app/api/tournaments', {
+      const res = await fetch('https://tpchess-backend.vercel.app/api/tournaments', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -344,5 +344,6 @@ export default function AdminTournois() {
     </>
   );
 }
+
 
 
