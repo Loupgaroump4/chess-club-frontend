@@ -13,7 +13,7 @@ export default function AdminPlanning() {
   const [events, setEvents] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
-  const [formData, setFormData] = useState({ title: "", format: "cours", début: "", fin: "" });
+  const [formData, setFormData] = useState({ title: "", format: "cours", start_date: "", end_date: "" });
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -43,7 +43,7 @@ export default function AdminPlanning() {
   };
 
   const handleDateClick = (info) => {
-    setFormData({ title: "", format: "cours", début: info.dateStr, fin: info.dateStr });
+    setFormData({ title: "", format: "cours", star: info.dateStr, end_date: info.dateStr });
     setCurrentEvent(null);
     setModalOpen(true);
   };
@@ -53,8 +53,8 @@ export default function AdminPlanning() {
     setFormData({
       title: ev.title,
       format: ev.extendedProps.format,
-      début: ev.start.toISOString(),
-      fin: ev.end ? ev.end.toISOString() : ev.start.toISOString(),
+      start_date: ev.start.toISOString(),
+      end_date: ev.end ? ev.end.toISOString() : ev.start.toISOString(),
     });
     setCurrentEvent(ev);
     setModalOpen(true);
@@ -142,8 +142,8 @@ export default function AdminPlanning() {
     return {
       id: ev.id,
       title: ev.title,
-      start: ev.début,
-      end: ev.fin,
+      start: ev.start_date,
+      end: ev.end_date,
       backgroundColor: color,
       borderColor: color,
       extendedProps: { format: ev.format }
@@ -186,15 +186,15 @@ export default function AdminPlanning() {
                 <label>Début:</label>
                 <input
                   type="datetime-local"
-                  value={formData.début.slice(0,16)}
-                  onChange={(e) => setFormData({ ...formData, début: e.target.value })}
+                  value={formData.start_date.slice(0,16)}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                   required
                 />
                 <label>Fin:</label>
                 <input
                   type="datetime-local"
-                  value={formData.fin.slice(0,16)}
-                  onChange={(e) => setFormData({ ...formData, fin: e.target.value })}
+                  value={formData.end_date.slice(0,16)}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                   required
                 />
                 <div style={{ marginTop: 10 }}>
@@ -242,5 +242,6 @@ export default function AdminPlanning() {
     </>
   );
 }
+
 
 
