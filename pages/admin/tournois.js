@@ -98,7 +98,7 @@ export default function AdminTournois() {
     if (participants.find(p => p.username === newParticipant)) return alert('Utilisateur déjà inscrit.');
 
     try {
-      const res = await fetch(`https://tpchess-beckend.vercel.app/api/tournaments/${tournamentId}/add-participant`, {
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${tournamentId}/add-participant`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -344,6 +344,7 @@ export default function AdminTournois() {
     </>
   );
 }
+
 
 
 
