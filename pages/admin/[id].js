@@ -1,382 +1,385 @@
-import { useState, useEffect, useMemo } from "react";
-import Header from "../../components/Header";
-import { useRouter } from "next/router";
-
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import Header from '../../components/Header';
 const API = "https://tpchess-backend.vercel.app";
 
-export default function TournamentDetail() {
+export default function AdminTournament() {
   const router = useRouter();
   const { id } = router.query;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const [user, setUser] = useState(null);
+  const [message, setMessage] = useState('');
   const [tournament, setTournament] = useState(null);
   const [participants, setParticipants] = useState([]);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [roundGroups, setRoundGroups] = useState([]); // [{ round_number, matches: [...] }]
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const [rounds, setRounds] = useState([]);
+  const [scoreboard, setScoreboard] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // --- Load tournament, participants, user and rounds ---
+  // 🔹 Charger toutes les données
+  const fetchData = async () => {
+  if (!id || !token) return;
+  setLoading(true);
+
+  try {
+    // 🔹 Tournoi
+    const resTour = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const tourData = await resTour.json();
+
+    if (tourData.ok) {
+      // 🔹 Enrichir les rounds et les matches avec round_id
+      const enrichedRounds = (tourData.tournament.rounds || []).map(r => ({
+        ...r,
+        matches: (r.matches || []).map(m => ({
+          ...m,
+          round_id: r.id, // ajoute round_id à chaque match
+        })),
+      }));
+
+      setTournament(tourData.tournament);
+      setRounds(enrichedRounds);
+    }
+
+    // 🔹 Participants
+    const resPart = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${id}/participants`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const partData = await resPart.json();
+    if (partData.ok) setParticipants(partData.participants);
+
+    // 🔹 Scoreboard
+    const resScore = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${id}/scoreboard`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const scoreData = await resScore.json();
+    if (scoreData.ok) setScoreboard(scoreData.scoreboard);
+
+  } catch (err) {
+    console.error(err);
+    alert('Erreur chargement des données.');
+  } finally {
+    setLoading(false);
+  }
+};
+
   useEffect(() => {
-    if (!id) return;
-
-    const load = async () => {
-      setLoading(true);
-      try {
-        // 1) Tournament
-        const res = await fetch(`${API}/api/tournaments/${id}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        if (!data.ok) throw new Error(data.error || "Erreur tournoi");
-        setTournament(data.tournament || null);
-
-        // 2) Participants (endpoint separate)
-        try {
-          const resPart = await fetch(`${API}/api/tournaments/${id}/participants`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          const partData = await resPart.json();
-          if (partData.ok) setParticipants(partData.participants || []);
-        } catch (e) {
-          console.warn('Impossible de charger participants:', e);
-          setParticipants([]);
-        }
-
-        // 3) Rounds (flat list) -> group by round_number
-        try {
-          const resRounds = await fetch(`${API}/api/tournaments/${id}/rounds`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          const roundsJson = await resRounds.json();
-          if (roundsJson.ok && Array.isArray(roundsJson.rounds)) {
-            const rows = roundsJson.rounds;
-            const grouped = Object.values(
-              rows.reduce((acc, r) => {
-                const rn = r.round_number || 0;
-                if (!acc[rn]) acc[rn] = { round_number: rn, matches: [] };
-                // Normalize match row to expected shape
-                acc[rn].matches.push({
-                  id: r.id,
-                  round_id: r.id, // keep id for score/absent endpoints
-                  player1_id: r.player1_id,
-                  player1_name: r.player1_name || r.player1_name,
-                  player2_id: r.player2_id,
-                  player2_name: r.player2_name || r.player2_name,
-                  score1: r.score1,
-                  score2: r.score2,
-                  finished: !!r.finished,
-                });
-                return acc;
-              }, {})
-            ).sort((a, b) => a.round_number - b.round_number);
-
-            setRoundGroups(grouped);
-          } else {
-            setRoundGroups([]);
-          }
-        } catch (e) {
-          console.warn('Impossible de charger rounds:', e);
-          setRoundGroups([]);
-        }
-
-        // 4) current user
-        if (token) {
-          try {
-            const userRes = await fetch(`${API}/api/me`, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            const userData = await userRes.json();
-            if (userData.ok && userData.user) setUser(userData.user);
-          } catch (e) {
-            console.warn('Impossible de charger user:', e);
-            setUser(null);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Erreur chargement");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      const u = JSON.parse(stored);
+      setUser(u);
+      if (!u.admin) setMessage('❌ Accès refusé : cette page est réservée aux administrateurs.');
+      else fetchTournaments();
+    } else {
+      setMessage('⚠️ Vous devez être connecté pour accéder à cette page.');
+      setLoading(false);
+    }
+  
+    fetchData();
   }, [id, token]);
+  // --- Ajouter un participant ---
+const addParticipant = async () => {
+  const username = prompt("Nom d'utilisateur du joueur à ajouter :");
+  if (!username) return;
 
-  // --- Derived values ---
-  const roundsSorted = useMemo(() => {
-    return roundGroups.map(r => ({
-      ...r,
-      finished: r.matches.length > 0 && r.matches.every(m => !!m.finished),
-    }));
-  }, [roundGroups]);
+  try {
+    const res = await fetch(`${API}/api/tournaments/${id}/add-participant`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ username }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert(`✅ ${username} ajouté au tournoi`);
+      fetchData(); // recharge les participants
+    } else {
+      alert(`❌ ${data.error || "Erreur serveur"}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur serveur");
+  }
+};
 
-  // current round = first not finished, else null
-  const currentRound = roundsSorted.find(r => !r.finished) || null;
-  const previousRounds = roundsSorted.filter(r => r.finished);
+// --- Générer la manche suivante ---
+const generateNextRound = async () => {
+  if (!confirm("Voulez-vous générer la prochaine ronde ?")) return;
 
-  // helper to find player's match in a list of matches
-  const findPlayerMatch = (matches, username) => {
-    if (!Array.isArray(matches)) return null;
-    return matches.find(m => m.player1_name === username || m.player2_name === username) || null;
-  };
+  try {
+    const res = await fetch(`${API}/api/tournaments/${id}/next-round`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert("✅ Nouvelle ronde générée");
+      fetchData(); // recharge les rounds
+    } else {
+      alert(`❌ ${data.error || "Erreur serveur"}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur serveur");
+  }
+};
 
-  // --- Actions ---
+  // 🔹 Enregistrer un score
   const saveScore = async (matchId, result) => {
-    if (!token) return alert('Connecte-toi pour enregistrer un score');
-    if (!result) return alert('Sélectionnez un résultat.');
+  if (!result) return alert('Sélectionnez un résultat.');
 
-    let score1 = null, score2 = null;
-    const norm = result.replace(/\s+/g, '').toLowerCase();
-    if (norm === '1-0') [score1, score2] = [1, 0];
-    else if (norm === '0-1') [score1, score2] = [0, 1];
-    else if (norm === '0.5-0.5' || norm === '0.5-0.5') [score1, score2] = [0.5, 0.5];
-    if (score1 === null) return alert('Résultat invalide.');
+  let score1 = null, score2 = null;
+  const norm = result.replace(/\s+/g, '').toLowerCase();
+  if (norm === '1-0') [score1, score2] = [1, 0];
+  else if (norm === '0-1') [score1, score2] = [0, 1];
+  else if (norm === '0.5-0.5') [score1, score2] = [0.5, 0.5];
 
-    try {
-      const res = await fetch(`${API}/api/rounds/${matchId}/score`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ score1, score2 }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        alert('✅ Score enregistré');
-        // refresh rounds
-        const ev = new Event('refreshRounds');
-        window.dispatchEvent(ev);
-      } else alert(`❌ ${data.error}`);
-    } catch (err) {
-      console.error(err);
-      alert('Erreur serveur.');
+  if (score1 === null) return alert('Résultat invalide.');
+
+  try {
+    const res = await fetch(`https://tpchess-backend.vercel.app/api/rounds/${matchId}/score`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ score1, score2 }),
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      // Récupérer les nouveaux Elos renvoyés par l’API
+      const eloMsg = data.newElo
+        ? Object.entries(data.newElo)
+            .map(([id, elo]) => `Joueur ${id}: ${elo}`)
+            .join('\n')
+        : '';
+
+      alert(`✅ Score enregistré\n📈 Elo mis à jour :\n${eloMsg}`);
+      fetchData(); // recharge scores, rounds et Elos
+    } else {
+      alert(`❌ ${data.error}`);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert('Erreur serveur.');
+  }
+};
 
-  const markAbsent = async (match) => {
-    if (!token) return alert('Connecte-toi pour marquer une absence');
-    const absent = prompt('Quel joueur est absent ? (1 ou 2)');
-    const absentId = absent === '1' ? match.player1_id : absent === '2' ? match.player2_id : null;
-    if (!absentId) return alert('Choix invalide.');
-    if (!confirm('Confirmer l\'absence ?')) return;
+const markAbsent = async (match) => {
+  const absent = prompt('Quel joueur est absent ? (1 ou 2)');
+  if (absent !== '1' && absent !== '2') return alert('Choix invalide.');
 
-    try {
-      const res = await fetch(`${API}/api/rounds/${match.id}/absent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ absentPlayerId: absentId }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        alert('✅ Joueur absent mis à jour');
-        const ev = new Event('refreshRounds');
-        window.dispatchEvent(ev);
-      } else alert(`❌ ${data.error}`);
-    } catch (err) {
-      console.error(err);
-      alert('Erreur serveur.');
-    }
-  };
+  const absentName = absent === '1' ? match.player1_name : match.player2_name;
 
-  // listen for manual refresh events (after score/absent)
-  useEffect(() => {
-    const handler = () => {
-      // re-trigger the load by programmatically calling the useEffect dependency
-      // simpler: reload rounds only
-      (async () => {
-        if (!id) return;
-        try {
-          const resRounds = await fetch(`${API}/api/tournaments/${id}/rounds`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-          const roundsJson = await resRounds.json();
-          if (roundsJson.ok && Array.isArray(roundsJson.rounds)) {
-            const rows = roundsJson.rounds;
-            const grouped = Object.values(
-              rows.reduce((acc, r) => {
-                const rn = r.round_number || 0;
-                if (!acc[rn]) acc[rn] = { round_number: rn, matches: [] };
-                acc[rn].matches.push({
-                  id: r.id,
-                  round_id: r.id,
-                  player1_id: r.player1_id,
-                  player1_name: r.player1_name,
-                  player2_id: r.player2_id,
-                  player2_name: r.player2_name,
-                  score1: r.score1,
-                  score2: r.score2,
-                  finished: !!r.finished,
-                });
-                return acc;
-              }, {})
-            ).sort((a, b) => a.round_number - b.round_number);
+  // Debug
+  console.log("absentName:", absentName);
+  console.log("participants:", participants);
 
-            setRoundGroups(grouped);
-          }
-        } catch (e) {
-          console.warn('reloadRounds error', e);
-        }
-      })();
-    };
-
-    window.addEventListener('refreshRounds', handler);
-    return () => window.removeEventListener('refreshRounds', handler);
-  }, [id, token]);
-
-  // --- Loading / not found states ---
-  if (loading || !tournament) return (
-    <>
-      <Header />
-      <div className="container mt-10">Chargement...</div>
-    </>
+  const absentParticipant = participants.find(
+    (p) => p.username.trim().toLowerCase() === absentName.trim().toLowerCase()
   );
 
-  // --- CASES ---
-  if (tournament.status === 'not_started' || !tournament.status) {
-    return (
-      <>
-        <Header />
-        <main className="container mt-10">
-          <h1 className="text-2xl font-bold mb-6">{tournament.name}</h1>
-          <p>Le tournoi n’a pas encore commencé.</p>
-          <h3 className="mt-4 font-semibold">Joueurs inscrits :</h3>
-          {participants.length === 0 ? (
-            <p>Aucun participant pour le moment.</p>
-          ) : (
-            <ul className="list-disc pl-6">
-              {participants.map((p) => (
-                <li key={p.id}>{p.username} (Elo: {p.elo || 'N/A'})</li>
-              ))}
-            </ul>
-          )}
-        </main>
-      </>
-    );
+  if (!absentParticipant?.id) return alert('Impossible de trouver l’ID du joueur.');
+
+  if (!confirm('Confirmer l’absence ?')) return;
+  console.log(`${match.id}`);
+  try {
+    const res = await fetch(`https://tpchess-backend.vercel.app/api/rounds/${match.id}/absent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ absentPlayerId: absentParticipant.id }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert('✅ Joueur absent mis à jour');
+      fetchData();
+    } else alert(`❌ ${data.error}`);
+  } catch (err) {
+    console.error(err);
+    alert('Erreur serveur.');
   }
+};
 
-  if (tournament.status === 'finished') {
-    // If backend provides results in tournament.results use that, otherwise compute from participants/rounds
-    const results = tournament.results || [];
-    const myRankIndex = results.findIndex(r => r.username === user?.username);
-    const myScore = myRankIndex >= 0 ? results[myRankIndex].score : null;
+;
 
+  if (loading) return <p>Chargement...</p>;
+
+  if (!user || !user.admin)
     return (
-      <>
-        <Header />
-        <main className="container mt-10 text-center">
-          <h1 className="text-3xl font-bold mb-6">🏁 Résultats du tournoi</h1>
-          {user && myRankIndex >= 0 && (
-            <div className="mb-10">
-              <h2 className="text-2xl font-semibold">Ton classement : <span className="text-blue-600">{myRankIndex + 1}ᵉ</span></h2>
-              <p>Score total : {myScore}</p>
-            </div>
-          )}
-
-          <h3 className="text-xl font-semibold mb-3">Classement général</h3>
-          <table className="mx-auto border border-gray-300 border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2">#</th>
-                <th className="border p-2">Joueur</th>
-                <th className="border p-2">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r, index) => (
-                <tr key={r.user_id} className={r.username === user?.username ? 'bg-yellow-100' : ''}>
-                  <td className="border p-2 font-bold">{index + 1}</td>
-                  <td className="border p-2">{r.username}</td>
-                  <td className="border p-2">{r.score}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </main>
-      </>
+      <div className="container">
+        <p>{message}</p>
+      </div>
     );
-  }
-
-  // --- tournament.status === 'started' ---
-  const myMatch = currentRound ? findPlayerMatch(currentRound.matches, user?.username) : null;
-  const opponent = myMatch ? (myMatch.player1_name === user?.username ? myMatch.player2_name : myMatch.player1_name) : null;
-
-  // Compute my total score from previousRounds
-  const myScore = previousRounds.reduce((acc, r) => {
-    const m = findPlayerMatch(r.matches, user?.username);
-    if (!m) return acc;
-    // If scores are stored numeric
-    if (typeof m.score1 === 'number' && typeof m.score2 === 'number') {
-      if (m.player1_name === user?.username) return acc + (m.score1 || 0);
-      if (m.player2_name === user?.username) return acc + (m.score2 || 0);
-      return acc;
-    }
-    // fallback to result string
-    if (m.result === '1-0' && m.player1_name === user?.username) return acc + 1;
-    if (m.result === '0-1' && m.player2_name === user?.username) return acc + 1;
-    if (m.result === '0.5-0.5') return acc + 0.5;
-    return acc;
-  }, 0);
 
   return (
     <>
       <Header />
-      <main className="container mt-10">
-        <h1 className="text-2xl font-bold mb-6">{tournament.name}</h1>
-        <p className="mb-4">Tournoi en cours !</p>
+      <main className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Tournoi : {tournament?.name}</h1>
+        {/* Tableau des scores */}
+        <h2 className="text-lg font-bold mb-2">Classement individuel</h2>
+        <table className="mx-auto border border-gray-300 border-collapse">
+  <thead>
+    <tr className="bg-gray-100">
+      <th className="border p-2">#</th>
+      <th className="border p-2">Joueur</th>
+      <th className="border p-2">Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    {scoreboard
+      .sort((a, b) => b.score - a.score) // optionnel : trier du plus grand au plus petit
+      .map((p, index) => (
+        <tr key={p.user_id ?? index}>
+          <td className="border p-2 font-bold">{index + 1}</td>
+          <td className="border p-2">{p.username}</td>
+          <td className="border p-2">{p.score ?? 0}</td>
+        </tr>
+      ))}
+  </tbody>
+</table>
 
-        <div className="card mb-6 p-4 border rounded">
-          <h2 className="text-xl font-semibold mb-2">Ta ronde actuelle</h2>
-
-          {currentRound ? (
-            <>
-              {Array.isArray(currentRound.matches) && currentRound.matches.length === 0 ? (
-                <p>En attente des appariements...</p>
-              ) : myMatch ? (
-                <>
-                  <p>Adversaire : {opponent || 'Bye'}</p>
-                  <p>Tu joues avec les pièces : {myMatch.player1_name === user?.username ? 'Blanches' : 'Noires'}</p>
-
-                  {!myMatch.finished && (
-                    <div className="mt-2 flex gap-2 items-center">
-                      <select id={`result-${myMatch.id}`} defaultValue="" className="border rounded p-1">
-                        <option value="">Résultat</option>
-                        <option value="1-0">1-0</option>
-                        <option value="0-1">0-1</option>
-                        <option value="0.5-0.5">0.5-0.5</option>
-                      </select>
-                      <button onClick={() => {
-                        const sel = document.getElementById(`result-${myMatch.id}`);
-                        saveScore(myMatch.id, sel.value);
-                      }} className="bg-blue-500 text-white px-3 py-1 rounded">Enregistrer</button>
-
-                      <button onClick={() => markAbsent(myMatch)} className="bg-red-500 text-white px-3 py-1 rounded">Absent</button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p>Aucun match trouvé pour cette ronde.</p>
-              )}
-            </>
-          ) : (
-            <p>Aucune ronde courante trouvée.</p>
-          )}
-        </div>
-
-        {previousRounds.length > 0 && (
-          <>
-            <h3 className="text-lg font-semibold mb-2">Résultats précédents</h3>
-            <ul className="list-disc pl-6">
-              {previousRounds.map((r) => {
-                const m = findPlayerMatch(r.matches, user?.username);
-                if (!m) return null;
-                return (
-                  <li key={r.round_number}>
-                    Ronde {r.round_number}: {m.player1_name} vs {m.player2_name || 'Bye'} → {m.finished ? `${m.score1 ?? '-'} - ${m.score2 ?? '-'}` : 'en attente'}
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-4 font-semibold">Score total : {myScore}</p>
-          </>
+        {/* Participants */}
+        <h2 className="text-lg font-bold mb-2">Participants</h2>
+        {participants.length === 0 ? (
+          <p>Aucun participant pour ce tournoi.</p>
+        ) : (
+          <ul className="list-disc pl-6 mb-4">
+            {participants.map((p) => (
+              <li key={p.id}>{p.username} (Elo: {p.elo || 'N/A'})</li>
+            ))}
+          </ul>
         )}
+
+        {/* Rounds */}
+          <h2 className="text-lg font-bold mb-2">Rounds</h2>
+            {rounds.length === 0 ? (
+          <p>Aucune ronde pour le moment.</p>
+          ) : (
+          rounds.map((m) => (
+            <div key={m.id} className="border p-3 rounded-md mb-3 bg-white shadow">
+              <p>
+                <strong>Ronde {m.round_number}</strong>
+              </p>
+
+              <p>
+                {m.player1_name} {m.player2_name ? `vs ${m.player2_name}` : '(bye)'}
+              </p>
+
+              {m.finished ? (
+                <p className="text-sm text-gray-600">
+                  Score : <strong>{m.score1 ?? '-'}</strong> - <strong>{m.score2 ?? '-'}</strong>
+                </p>
+                ) : (
+                m.player2_name && (
+                  <div className="flex gap-2 items-center mt-1">
+                    <select
+                      value={m.result || ''}
+                      onChange={(e) =>
+                        setRounds((prev) =>
+                          prev.map((rm) =>
+                            rm.id === m.id ? { ...rm, result: e.target.value } : rm
+                          )
+                        )
+                      }
+                      className="border rounded p-1"
+                    >
+                      <option value="">Résultat</option>
+                      <option value="1-0">1-0</option>
+                      <option value="0-1">0-1</option>
+                      <option value="0.5-0.5">0.5-0.5</option>
+                    </select>
+
+                    <button
+                      onClick={() => saveScore(m.id, m.result)}
+                      className="bg-blue-500 text-white px-3 py-1 rounded"
+                    >
+                      Enregistrer
+                    </button>
+                  
+                    {!m.score1 && (
+                      <button
+                        onClick={() => markAbsent(m)}
+                        className="bg-red-500 text-white px-3 py-1 rounded"
+                      >
+                        Absent
+                      </button>
+                    )}
+                  </div>
+                )
+              )}
+            </div>
+          ))
+        )}
+
+      <div className="flex gap-3 mb-6">
+          {/* Ajouter un participant */}
+          <button
+  onClick={async () => {
+    const username = prompt("Nom du joueur à ajouter :");
+    if (!username) return;
+
+    try {
+      const res = await fetch(`${API}/api/tournaments/${id}/add-participant`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await res.json().catch(() => null); // sécurité si JSON invalide
+      if (res.ok && data?.ok) {
+        alert("✅ Participant ajouté !");
+        fetchData();
+      } else {
+        alert("❌ " + (data?.error || `Erreur serveur (${res.status})`));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur serveur : " + err.message);
+    }
+  }}
+  className="px-4 py-2 bg-green-600 text-white rounded"
+>
+  ➕ Ajouter un participant
+</button>
+
+
+          {/* Générer le prochain round */}
+          <button
+  onClick={async () => {
+    if (!confirm("Générer le prochain round ?")) return;
+
+    try {
+      const res = await fetch(`${API}/api/tournaments/${id}/next-round`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.ok) {
+        alert("✅ Nouveau round généré !");
+        fetchData();
+      } else {
+        alert("❌ " + (data?.error || `Erreur serveur (${res.status})`));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur serveur : " + err.message);
+    }
+  }}
+  className="px-4 py-2 bg-purple-600 text-white rounded"
+>
+  ♟️ Générer la prochaine ronde
+</button>
+
+        </div>
       </main>
     </>
   );
