@@ -96,7 +96,7 @@ function parseNewsText(text) {
     if (!confirm("Supprimer cette actualité ?")) return;
 
     try {
-      const res = await fetch(`https://tpchess-backend.vercel.app/api/anews/${newsId}`, {
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/news/${newsId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -194,5 +194,6 @@ function parseNewsText(text) {
     );
 
 }
+
 
 
