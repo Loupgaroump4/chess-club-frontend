@@ -56,7 +56,7 @@ export default function AdminTournois() {
     if (!token) return alert('Non autorisé');
 
     try {
-      const res = await fetch('https://tpchess.vercel.app/api/tournaments', {
+      const res = await fetch('https://tpchess-backend.vercel.app/api/tournaments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ export default function AdminTournois() {
   // Charger participants
   const loadParticipants = async (tournamentId) => {
     try {
-      const res = await fetch(`https://tpchess.vercel.app/api/tournaments/${tournamentId}/participants`, {
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${tournamentId}/participants`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -98,7 +98,7 @@ export default function AdminTournois() {
     if (participants.find(p => p.username === newParticipant)) return alert('Utilisateur déjà inscrit.');
 
     try {
-      const res = await fetch(`https://tpchess.vercel.app/api/tournaments/${tournamentId}/add-participant`, {
+      const res = await fetch(`https://tpchess-beckend.vercel.app/api/tournaments/${tournamentId}/add-participant`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ export default function AdminTournois() {
     if (!confirm('Retirer ce participant ?')) return;
     try {
       const res = await fetch(
-        `https://tpchess.vercel.app/api/tournaments/${tournamentId}/participants/${userId}`,
+        `https://tpchess-backend.vercel.app/api/tournaments/${tournamentId}/participants/${userId}`,
         { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
@@ -139,7 +139,7 @@ export default function AdminTournois() {
   const deleteTournament = async (tournamentId) => {
     if (!confirm('Supprimer ce tournoi ?')) return;
     try {
-      const res = await fetch(`https://tpchess.vercel.app/api/tournaments/${tournamentId}`, {
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${tournamentId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -158,7 +158,7 @@ export default function AdminTournois() {
   const startTournament = async (tournamentId) => {
     if (!confirm('Lancer ce tournoi ?')) return;
     try {
-      const res = await fetch(`https://tpchess.vercel.app/api/tournaments/${tournamentId}/start`, {
+      const res = await fetch(`https://tpchess-backend.vercel.app/api/tournaments/${tournamentId}/start`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -344,6 +344,7 @@ export default function AdminTournois() {
     </>
   );
 }
+
 
 
 
