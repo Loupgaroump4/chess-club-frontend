@@ -43,7 +43,7 @@ export default function AdminPlanning() {
   };
 
   const handleDateClick = (info) => {
-    setFormData({ title: "", format: "cours", star: info.dateStr, end_date: info.dateStr });
+    setFormData({ title: "", format: "cours", start_date: info.dateStr, end_date: info.dateStr });
     setCurrentEvent(null);
     setModalOpen(true);
   };
@@ -242,6 +242,7 @@ export default function AdminPlanning() {
     </>
   );
 }
+
 
 
 
