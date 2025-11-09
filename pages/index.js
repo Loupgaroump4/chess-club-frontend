@@ -110,7 +110,7 @@ export default function Home() {
         {/* ✅ Image */}
         {n.image_url && (
           <img
-            src={`https://tpchess-backend.vercel.app/${n.image_url}`}
+            src={`${n.image_url}`}
             alt="actualité"
             style={{
               height: "150px",
