@@ -2,7 +2,7 @@
   --blue: #1E3A8A;
   --bg: #F8F9FA;
 }
-html,body,#__next{ height:100%; margin:0; font-family: Inter, system-ui, Arial; background:var(--bg); color:#111; }
+html,body,#__next{ width:100%; margin:0; font-family: Inter, system-ui, Arial; background:var(--bg); color:#111; }
 a{ color:var(--blue); text-decoration:none;}
 .header{ background: linear-gradient(90deg, var(--blue), lightgray); padding:12px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 6px rgba(0,0,0,0.05);}
 .header .nav a{ margin-right:16px; font-weight:600; color:var(--blue); }
