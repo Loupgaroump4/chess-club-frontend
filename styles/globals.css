@@ -8,6 +8,7 @@ html, body, #__next {
   overflow-x: hidden;
   width: 100%;
   margin: 4px;
+  margin-right: 4px; 
   font-family: Inter, system-ui, Arial;
   background: var(--bg);
   color: #111;
