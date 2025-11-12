@@ -74,23 +74,26 @@ export default function Tournois() {
     }
   }
   async function addParticipant(tournamentId, username) {
-    const res = await fetch(`/tournaments/${tournamentId}/add-participant`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ username }),
-    });
+  const token = localStorage.getItem('token'); // récupère le token ici
+  if (!token) return alert('Veuillez vous connecter.');
 
-    const data = await res.json();
-    if (data.ok) {
-      // ⚙️ On ajoute le joueur complet à la liste
-      setParticipants([...participants, data.participant]);
-    } else {
-      alert(data.error || 'Erreur');
-    }
+  const res = await fetch(`${API}/tournaments/${tournamentId}/add-participant`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ username }),
+  });
+
+  const data = await res.json();
+  if (data.ok) {
+    setParticipants(prev => [...prev, data.participant]);
+  } else {
+    alert(data.error || 'Erreur');
   }
+}
+
 
   return (
     <>
