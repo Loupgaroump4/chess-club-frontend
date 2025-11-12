@@ -3,6 +3,10 @@
   --bg: #F8F9FA;
 }
 
+* {
+  outline: 1px solid rgba(255, 0, 0, 0.2);
+}
+
 /* Global */
 html, body, #__next {
   box-sizing: border-box;
