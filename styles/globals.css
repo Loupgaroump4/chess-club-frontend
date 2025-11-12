@@ -3,6 +3,21 @@
   --bg: #F8F9FA;
 }
 
+/* Chrome, Edge, Safari */
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+body {
+  scrollbar-width: none;
+}
+
+/* IE et anciens Edge */
+body {
+  -ms-overflow-style: none;
+}
+
 * {
   outline: 1px solid rgba(255, 0, 0, 0.2);
 }
