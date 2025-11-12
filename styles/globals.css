@@ -52,6 +52,7 @@ a {
   border-radius: 8px;
   background: linear-gradient(180deg, rgba(133,138,30,0.03), rgba(255,215,0,0.03));
   margin-bottom: 12px;
+  margin-right: 12px;
 }
 
 /* Buttons & inputs */
