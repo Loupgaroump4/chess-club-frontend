@@ -5,6 +5,8 @@
 
 /* Global */
 html, body, #__next {
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
   width: 100%;
   font-family: Inter, system-ui, Arial;
